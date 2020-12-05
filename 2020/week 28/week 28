@@ -1,0 +1,119 @@
+library(tidyverse)
+
+raw_arabica <- read_csv("https://raw.githubusercontent.com/jldbc/coffee-quality-database/master/data/arabica_data_cleaned.csv") %>% 
+  janitor::clean_names()
+
+raw_robusta <- read_csv("https://raw.githubusercontent.com/jldbc/coffee-quality-database/master/data/robusta_data_cleaned.csv",
+                        col_types = cols(
+                          X1 = col_double(),
+                          Species = col_character(),
+                          Owner = col_character(),
+                          Country.of.Origin = col_character(),
+                          Farm.Name = col_character(),
+                          Lot.Number = col_character(),
+                          Mill = col_character(),
+                          ICO.Number = col_character(),
+                          Company = col_character(),
+                          Altitude = col_character(),
+                          Region = col_character(),
+                          Producer = col_character(),
+                          Number.of.Bags = col_double(),
+                          Bag.Weight = col_character(),
+                          In.Country.Partner = col_character(),
+                          Harvest.Year = col_character(),
+                          Grading.Date = col_character(),
+                          Owner.1 = col_character(),
+                          Variety = col_character(),
+                          Processing.Method = col_character(),
+                          Fragrance...Aroma = col_double(),
+                          Flavor = col_double(),
+                          Aftertaste = col_double(),
+                          Salt...Acid = col_double(),
+                          Balance = col_double(),
+                          Uniform.Cup = col_double(),
+                          Clean.Cup = col_double(),
+                          Bitter...Sweet = col_double(),
+                          Cupper.Points = col_double(),
+                          Total.Cup.Points = col_double(),
+                          Moisture = col_double(),
+                          Category.One.Defects = col_double(),
+                          Quakers = col_double(),
+                          Color = col_character(),
+                          Category.Two.Defects = col_double(),
+                          Expiration = col_character(),
+                          Certification.Body = col_character(),
+                          Certification.Address = col_character(),
+                          Certification.Contact = col_character(),
+                          unit_of_measurement = col_character(),
+                          altitude_low_meters = col_double(),
+                          altitude_high_meters = col_double(),
+                          altitude_mean_meters = col_double()
+                        )) %>% 
+  janitor::clean_names() %>% 
+  rename(acidity = salt_acid, sweetness = bitter_sweet,
+         aroma = fragrance_aroma, body = mouthfeel,uniformity = uniform_cup)
+
+
+all_ratings <- bind_rows(raw_arabica, raw_robusta) %>% 
+  select(-x1) %>% 
+  select(total_cup_points, species, everything())
+
+all_ratings %>% 
+  skimr::skim()
+
+library(gganimate)
+theme_set(theme_bw())
+
+raw_arabica<-raw_arabica %>%
+  mutate(harvest_year=as.integer(harvest_year)) %>%
+  drop_na(harvest_year)%>%
+  drop_na(processing_method) %>% 
+  drop_na(altitude_mean_meters) 
+
+
+plotcolors <- c("Washed / Wet"="#c9e5e8", "Natural / Dry"="#b38c80","Pulped natural / honey"="#f9e406",
+                "Semi-washed / Semi-pulped"="#fa7938","Other"="#7b819d")
+
+ggplot(raw_arabica, 
+  aes(x = flavor, y=total_cup_points, size=6, colour = processing_method))+
+  geom_point(show.legend = TRUE, alpha = 0.4) +
+  scale_color_manual(values = plotcolors,name=NULL) +
+  scale_size(guide = NULL)+
+  labs(x = "Flavor", y = "Total cup points")+
+  ylim(55,95)+
+  transition_time(harvest_year)+
+  labs(title = "Year: {frame_time}")
+
+
+arabica_sum<- raw_arabica %>% 
+  group_by(processing_method) %>% 
+  summarise(aroma=mean(aroma),
+            flavour=mean(flavor),
+            aftertaste=mean(aftertaste),
+            acidity=mean(acidity),
+            body=mean(body),
+            balance=mean(balance))  
+
+arabica_sum<- arabica_sum %>% 
+  remove_rownames() %>% 
+  column_to_rownames(var="processing_method")
+
+library(fmsb)
+radarchart(arabica_sum)
+
+plotcolors <- c("Natural / Dry"="#80b380","Other"="#999999", "Pulped natural / honey"="#f0d342",
+                "Semi-washed / Semi-pulped"="#d2642d","Washed / Wet"="#a6d2f2")
+colors_in <- alpha(plotcolors,0.3)
+
+radarchart(arabica_sum, axistype=0, maxmin = FALSE,
+            #custom polygon
+            pcol=plotcolors , plwd=4 , plty=1,
+            #custom the grid
+            cglcol="grey", cglty=1, axislabcol="grey", caxislabels=seq(0,20,5), cglwd=0.8,
+            #custom labels
+            vlcex=0.8 
+)
+
+# Add a legend
+legend(x=1.2, y=1, legend = rownames(arabica_sum), 
+       bty = "n", pch=20 , col=plotcolors , text.col = "black", cex=1.2, pt.cex=3)
