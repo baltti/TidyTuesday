@@ -36,8 +36,8 @@ ggplot(df_trails_feat,
     stroke = 1,
     color = "black"
   ) +
-  scale_fill_material("brown", reverse = TRUE)+
-  scale_color_material("brown", reverse = TRUE)+
+  scale_fill_material("brown")+
+  scale_color_material("brown")+
   ggtitle(label="Washington trails", subtitle = "Trails grouped by feature and ordered by median rating")+
   theme_minimal()+
   theme(axis.title = element_blank(),
@@ -50,4 +50,4 @@ ggplot(df_trails_feat,
                             family = "Walkway",face = "bold",
                             colour = "black"))+
   ggsave((paste0("hikes-", format(Sys.time(), "%Y%m%d_%H%M%S"),
-                 ".png")), device = "png",dpi = 500, width = 10, height = 10)
+                 ".png")), device = "png",dpi = 500, width = 8, height = 10)
