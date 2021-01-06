@@ -133,7 +133,7 @@ gtsave(transit_eu, "transit-cost-europe.html")
 
 
 transit_world<-transit_cost %>% 
-  drop_na() %>% 
+  drop_na(cost,cost_km_millions,real_cost) %>% 
   mutate(country=case_when(
     country=="NL"~"Netherlands",
     country=='BG'~"Bulgaria",
@@ -188,7 +188,9 @@ transit_world<-transit_cost %>%
     country=="AE"~"United Arab Emirates ",
     country=="EG"~"Egypt",
     country=="KW"~"Kuwait",
-    country=="UZ"~"Uzbekistan"
+    country=="UZ"~"Uzbekistan",
+    country=="QA"~"Qatar",
+    country=="BH"~"Bahrain"
   )) %>% 
   mutate(real_cost=as.numeric(real_cost)) %>% 
   group_by(country) %>% 
@@ -235,7 +237,7 @@ transit_world<-transit_cost %>%
   cols_label(
     `line`="Line",
     `start_year`="Years of construction",
-    `length`="Proposed length",
+    `length`="Proposed length, km",
     `tunnel_per`="Completed",
     `stations`="Number of stations",
     `cost`="Cost, millions",
@@ -292,7 +294,7 @@ library(htmltools)
 library(htmlwidgets)
 
 cost<-transit_cost %>% 
-  drop_na() %>% 
+  drop_na(cost,cost_km_millions,real_cost) %>% 
   mutate(country=case_when(
     country=="NL"~"Netherlands",
     country=='BG'~"Bulgaria",
@@ -347,7 +349,9 @@ cost<-transit_cost %>%
     country=="AE"~"United Arab Emirates ",
     country=="EG"~"Egypt",
     country=="KW"~"Kuwait",
-    country=="UZ"~"Uzbekistan"
+    country=="UZ"~"Uzbekistan",
+    country=="QA"~"Qatar",
+    country=="BH"~"Bahrain"
   )) %>% 
   mutate(real_cost=as.numeric(real_cost)) %>% 
   group_by(country) %>% 
