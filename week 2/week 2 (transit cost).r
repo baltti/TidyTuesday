@@ -207,6 +207,10 @@ transit_world<-transit_cost %>%
     columns = vars(cost,cost_km_millions), # reference cols by position
     decimals = 3 # decrease decimal places
   ) %>% 
+  fmt_number(
+    columns = vars(length), # reference cols by position
+    decimals = 1 # decrease decimal places
+  ) %>%
   cols_hide(columns = vars(e,rr,source1,source2,reference,
                            tunnel,year, ppp_rate)) %>% 
   text_transform(
